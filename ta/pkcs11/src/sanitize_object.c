@@ -341,7 +341,6 @@ static void __trace_attributes(char *prefix, void *src, void *end,
 	for (; cur < (char *)end; cur += next) {
 		struct pkcs11_attribute_head pkcs11_ref;
 		uint8_t data[4] = { 0 };
-		uint32_t data_u32 = 0;
 		char *start = NULL;
 		size_t avail = 0;
 
