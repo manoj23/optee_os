@@ -74,6 +74,19 @@ allocate_tee_operation(struct pkcs11_session *session,
 	if (pkcs2tee_algorithm(&algo, params))
 		return PKCS11_CKR_FUNCTION_FAILED;
 
+	/*
+	 * TEE_AllocateOperation() reports TEE_ERROR_NOT_SUPPORTED only for an
+	 * algorithm identifier it does not recognise at all. An identifier it
+	 * does recognise but whose primitive the GP TEE was built without
+	 * fails further in, where the error is neither out-of-memory nor
+	 * not-supported and TEE_AllocateOperation() panics the TA rather than
+	 * returning. Every mechanism in token_mechanism[] is reachable from
+	 * C_DigestInit, so that panic is caller-triggerable. Ask for the
+	 * primitive first and report its absence as a mechanism error.
+	 */
+	if (TEE_IsAlgorithmSupported(algo, TEE_CRYPTO_ELEMENT_NONE))
+		return PKCS11_CKR_MECHANISM_INVALID;
+
 	res = TEE_AllocateOperation(&session->processing->tee_op_handle,
 				    algo, TEE_MODE_DIGEST, 0);
 	if (res)
