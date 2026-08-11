@@ -816,8 +816,12 @@ const char *id2str_attr_value(uint32_t id, size_t size, void *value)
 	static const char str_unknown[] = "*";
 	uint32_t type = 0;
 
-	if (pkcs11_attr2boolprop_shift(id) >= 0)
+	if (pkcs11_attr2boolprop_shift(id) >= 0) {
+		if (size < sizeof(uint8_t))
+			return str_unknown;
+
 		return *(uint8_t *)value ? str_true : str_false;
+	}
 
 	if (size < sizeof(uint32_t))
 		return str_unknown;
